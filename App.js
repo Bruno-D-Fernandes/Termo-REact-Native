@@ -2,11 +2,9 @@ import { StatusBar } from 'expo-status-bar';
 import { Pressable, Text, View } from 'react-native';
 import { FlatList, TextInput } from 'react-native-web';
 import styles from './style.js';
-import { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
-export default function App() {
-
-const Input = ({ value, onChangeText, inputColor, inputRef }) => {
+const Input = ({ value, onChangeText, inputColor, inputRefCallback }) => {
   return(
       <View style={styles.input}>   
         <TextInput 
@@ -15,11 +13,11 @@ const Input = ({ value, onChangeText, inputColor, inputRef }) => {
           keyboardType="numeric"
           maxLength={1}
           style={{height: '100%', fontSize: 40, textAlign: 'center', ...inputColor}}
-          ref={inputRef}
+          ref={inputRefCallback}
         />
       </View>
   );
-}
+};
 
 const Row = ({ guess, colors }) => {
   return (
@@ -35,13 +33,19 @@ const Row = ({ guess, colors }) => {
       ))}
     </View>
   );
-}
+};
+
+export default function App() {
 
 function submitGuess() {
-  if (currentGuess.length !== sortedNum.length) { // Arruma aqui Bruno do futuro
+  if(currentGuess.includes('')){
     alert('Preencha todos os campos');
     return;
   }
+
+  console.log(inputColors)
+
+
 
   const colors = [];
   const sortedNumArray = sortedNum.split('');
@@ -56,12 +60,37 @@ function submitGuess() {
     }
   });
 
+  if (currentGuess.join('') === sortedNum) {
+    alert("Parabéns! Você acertou o número.");
+    return;
+}
+
+if (pastGuesses.length + 1 === 5) {
+    alert(`Fim de jogo! O número correto era ${sortedNum}.`);
+    return;
+}
+
+
+
   setPastGuesses(prevGuesses => [...prevGuesses, { guess: currentGuess.join(''), colors }]);
   setCurrentGuess(Array(sortedNum.length).fill(''));
   setInputColors(Array(sortedNum.length).fill({})); 
+
+
 }
 
-const sortedNum = "12345";
+useEffect(() => {
+  sortNumber();
+}, []);
+
+function sortNumber() {
+  let randomNum = Math.floor(Math.random() * 100000).toString();
+  if(randomNum.length < 5){ randomNum = (parseInt(randomNum) * 10).toString()}
+  setSortedNum(randomNum);
+  
+}
+
+const [sortedNum, setSortedNum] = useState(Array(5).fill(''));
 const [currentGuess, setCurrentGuess] = useState(Array(sortedNum.length).fill(''));
 const [inputColors, setInputColors] = useState(Array(sortedNum.length).fill({}));
 const [pastGuesses, setPastGuesses] = useState([]);
@@ -85,10 +114,12 @@ return (
               const newGuess = [...currentGuess];
               newGuess[index] = valor;
               setCurrentGuess(newGuess);
-              if(inputRefs.current[index + 1]){inputRefs.current[index + 1].focus();}
+              if (index < sortedNum.length - 1 && inputRefs.current[index + 1]) {
+                inputRefs.current[index + 1].focus();
+              }
             }}
             inputColor={inputColors[index]} 
-            inputRef={(element) => { 
+            inputRefCallback={(element) => { 
               inputRefs.current[index] = element;
             }}
           />
@@ -105,3 +136,4 @@ return (
   </View>
 );
 }
+
