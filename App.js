@@ -4,7 +4,7 @@ import { FlatList } from 'react-native-web';
 import { useEffect, useRef, useState } from 'react';
 import GameModal from './components/Modal';
 
-
+import ProgressBar from './components/ProgressBar.js';
 import Input from './components/Input.js';
 import Row from './components/Row.js';
 import styles from './style.js';
@@ -71,8 +71,13 @@ export default function App() {
     setSortedNum(randomNum);
   }
 
+  const maxAttempt = 6;
+
   return (
     <View style={styles.main}>
+
+    <ProgressBar currentAttempts={pastGuesses.length} maxAttempts={maxAttempt}/>
+
       <GameModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
